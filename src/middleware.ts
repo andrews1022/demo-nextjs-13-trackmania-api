@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "./lib/prisma";
 import { unixTimestampToDate, urlBase64Decode } from "./lib/utils";
 
-import type { AuthTokenResp } from "./types/api";
+import type { AuthTokenResp } from "@/types/api";
 
 const middleware = async (request: NextRequest) => {
   try {

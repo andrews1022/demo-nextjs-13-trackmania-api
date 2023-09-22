@@ -1,4 +1,4 @@
-import type { DecodedPayload } from "@/types";
+import { DecodedPayload } from "@/types/api";
 
 const unixTimestampToDate = (unixTimestamp: number): Date => {
   return new Date(unixTimestamp * 1000);
