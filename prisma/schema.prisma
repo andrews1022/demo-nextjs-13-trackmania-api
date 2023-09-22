@@ -18,14 +18,3 @@ model ApiToken {
   refreshToken   String
   addedOn        DateTime @default(now())
 }
-
-// model AccessToken {
-//   id         String   @id @default(cuid())
-//   token      String   @unique
-//   expiration DateTime
-// }
-
-// model RefreshToken {
-//   id    String @id @default(cuid())
-//   token String @unique
-// }

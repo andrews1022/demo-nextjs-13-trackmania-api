@@ -4,17 +4,7 @@ import { unixTimestampToDate, urlBase64Decode } from "./lib/utils";
 
 import type { AuthTokenResp } from "./types";
 
-// This function can be marked `async` if using `await` inside
 const middleware = async (request: NextRequest) => {
-  // console.log("middleware running!!!");
-  // return NextResponse.json(request)
-  // const apiTokenTest = await prisma.apiToken.findUnique({
-  //   where: {
-  //     tokenId: "c1Z1oSjpTT3REWxoeuK0xcWQBj"
-  //   }
-  // });
-  // console.log("apiTokenTest: ", apiTokenTest);
-
   try {
     const mostRecentApiToken = await prisma.apiToken.findFirst({
       orderBy: {
@@ -23,7 +13,7 @@ const middleware = async (request: NextRequest) => {
     });
 
     if (mostRecentApiToken) {
-      const { accessToken, expirationDate } = mostRecentApiToken;
+      const { accessToken, expirationDate, refreshToken } = mostRecentApiToken;
 
       const tokenExpirationDate = new Date(expirationDate);
       const currentDate = new Date();
@@ -33,14 +23,12 @@ const middleware = async (request: NextRequest) => {
         console.log("the token is expired - get a new one");
 
         const url = "https://prod.trackmania.core.nadeo.online/v2/authentication/token/basic";
-        const login = process.env.TM_SERVER_ACCOUNT_LOGIN;
-        const password = process.env.TM_SERVER_ACCOUNT_PASSWORD;
 
         const res = await fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Basic ${btoa(`${login}:${password}`)}`
+            Authorization: `nadeo_v1 t=${refreshToken}`
           },
           body: JSON.stringify({
             audience: "NadeoLiveServices"
@@ -58,23 +46,23 @@ const middleware = async (request: NextRequest) => {
         }
 
         const newTokens: AuthTokenResp = await res.json();
-        const { accessToken, refreshToken } = newTokens;
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = newTokens;
 
-        const [header, payload, structure] = accessToken.split(".");
+        const [header, payload, structure] = newAccessToken.split(".");
         const { exp, rat } = urlBase64Decode(payload);
-        const newExpDate = unixTimestampToDate(rat);
+        const newExpirationDate = unixTimestampToDate(rat);
 
         await prisma.apiToken.create({
           data: {
-            accessToken,
-            expirationDate: newExpDate,
-            refreshToken,
+            accessToken: newAccessToken,
+            expirationDate: newExpirationDate,
+            refreshToken: newRefreshToken,
             addedOn: new Date()
           }
         });
-      } else {
-        console.log("the token is valid - you good!");
       }
+
+      console.log("the token is valid - you good!");
 
       // clone the request headers and set a new header `x-hello-from-middleware1`
       const requestHeaders = new Headers(request.headers);
@@ -86,15 +74,7 @@ const middleware = async (request: NextRequest) => {
           headers: requestHeaders
         }
       });
-      // NextResponse.next({
-      //   request: {
-      //     // New request headers
-      //     headers: requestHeaders
-      //   }
-      // });
     }
-
-    // console.log("mostRecentApiToken: ", mostRecentApiToken);
   } catch (error) {
     return NextResponse.json(
       {
