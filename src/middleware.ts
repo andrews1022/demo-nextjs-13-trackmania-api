@@ -23,12 +23,14 @@ const middleware = async (request: NextRequest) => {
         console.log("the token is expired - get a new one");
 
         const url = "https://prod.trackmania.core.nadeo.online/v2/authentication/token/basic";
+        const login = process.env.TM_SERVER_ACCOUNT_LOGIN;
+        const password = process.env.TM_SERVER_ACCOUNT_PASSWORD;
 
         const res = await fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `nadeo_v1 t=${refreshToken}`
+            Authorization: `Basic ${btoa(`${login}:${password}`)}`
           },
           body: JSON.stringify({
             audience: "NadeoLiveServices"
