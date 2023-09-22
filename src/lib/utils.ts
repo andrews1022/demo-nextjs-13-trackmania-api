@@ -1,6 +1,12 @@
-const urlBase64Decode = (input: string) => {
+import type { DecodedPayload } from "@/types";
+
+const unixTimestampToDate = (unixTimestamp: number): Date => {
+  return new Date(unixTimestamp * 1000);
+};
+
+const urlBase64Decode = (payload: string): DecodedPayload => {
   // decode the base64 string
-  const base64Decoded = atob(input);
+  const base64Decoded = atob(payload);
 
   // URL-decode the data
   const urlDecoded = decodeURIComponent(base64Decoded);
@@ -9,4 +15,4 @@ const urlBase64Decode = (input: string) => {
   return JSON.parse(urlDecoded);
 };
 
-export { urlBase64Decode };
+export { unixTimestampToDate, urlBase64Decode };
