@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "./lib/prisma";
 import { unixTimestampToDate, urlBase64Decode } from "./lib/utils";
 
-import type { AuthTokenResp } from "./types";
+import type { AuthTokenResp } from "./types/api";
 
 const middleware = async (request: NextRequest) => {
   try {
@@ -66,16 +66,10 @@ const middleware = async (request: NextRequest) => {
 
       console.log("the token is valid - you good!");
 
-      // clone the request headers and set a new header `x-hello-from-middleware1`
-      const requestHeaders = new Headers(request.headers);
-
-      requestHeaders.set("Authorization", `nadeo_v1 t=${accessToken}`);
-
-      return NextResponse.next({
-        request: {
-          headers: requestHeaders
-        }
-      });
+      // set a new response header "Authorization"
+      const response = NextResponse.next();
+      response.headers.set("Authorization", `nadeo_v1 t=${accessToken}`);
+      return response;
     }
   } catch (error) {
     return NextResponse.json(

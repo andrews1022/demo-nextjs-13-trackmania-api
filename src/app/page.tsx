@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import type { TrackmaniaTrack } from "@/types";
+import type { TrackmaniaTrack } from "@/types/trackmania";
 
 const getMapInfo = async (): Promise<TrackmaniaTrack> => {
   const mapUId = "7hk8IflYsbMbpJv2gyYzx48Zvt7";
@@ -35,7 +35,7 @@ const HomePage = async () => {
 
   return (
     <div>
-      <h1>HomePage</h1>
+      <h1 className="text-4xl">Home Page</h1>
 
       <p>Track name: {mapInfo.name}</p>
     </div>
